@@ -1,3 +1,3 @@
 # chatbot
 
-not a chatbot..
+not a chatbot, yet.
