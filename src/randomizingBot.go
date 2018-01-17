@@ -3,16 +3,22 @@ package main
 import (
 	"fmt"
 	"strings"
-
+  "github.com/joho/godotenv"
+  "os"
+  "log"
 	"github.com/nlopes/slack"
 )
 
 func main() {
-
-	token := "xoxb-299757536226-OaWKMHM8bncfFQKcuhXspG31"
+  err := godotenv.Load()
+ if err != nil {
+   log.Fatal("Error loading .env file")
+ }
+	token := os.Getenv("SLACK_TOKEN")
 	api := slack.New(token)
 	rtm := api.NewRTM()
   // var input = []string
+  // var RandType = ""
 	go rtm.ManageConnection()
 
 Loop:
@@ -28,7 +34,6 @@ Loop:
 				fmt.Printf("Message: %v\n", ev)
 				info := rtm.GetInfo()
 				prefix := fmt.Sprintf("<@%s> ", info.User.ID)
-
 				if ev.User != info.User.ID && strings.HasPrefix(ev.Text, prefix) {
           fmt.Println(ev.User)
           var input = addIntoArray(ev.Text)
@@ -54,5 +59,6 @@ Loop:
 
 
   func erza3(data []string)string{
+    // RandType :=  data[1]
     return data[0]
   }
