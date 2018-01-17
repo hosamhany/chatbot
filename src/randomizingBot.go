@@ -8,7 +8,6 @@ import (
   "log"
 	"github.com/nlopes/slack"
 )
-
 func main() {
   err := godotenv.Load()
  if err != nil {
@@ -37,6 +36,8 @@ Loop:
 				if ev.User != info.User.ID && strings.HasPrefix(ev.Text, prefix) {
           fmt.Println(ev.User)
           var input = addIntoArray(ev.Text)
+          assignRandomType(input[1], rtm, ev)
+          // rtm.SendMessage(rtm.NewOutgoingMessage(randType, ev.Channel))
 					rtm.SendMessage(rtm.NewOutgoingMessage(erza3(input), ev.Channel))
 				}
 
@@ -57,6 +58,19 @@ Loop:
     return strings.Split(text, " ")
   }
 
+  func assignRandomType(text string, rtm *slack.RTM, ev *slack.MessageEvent){
+    switch text {
+    case "randomPairs":
+      fmt.Println("randomPairs")
+    case "one":
+      fmt.Println("randomOne")
+    case "all":
+      fmt.Println("randomAll")
+    default:
+      rtm.SendMessage(rtm.NewOutgoingMessage("arza3", ev.Channel))
+
+    }
+  }
 
   func erza3(data []string)string{
     // RandType :=  data[1]
