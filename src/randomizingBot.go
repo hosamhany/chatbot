@@ -9,6 +9,7 @@ import (
 	"github.com/nlopes/slack"
 	"math/rand"
 	"time"
+	"strconv"
 )
 func main() {
 	rand.Seed(time.Now().Unix())
@@ -64,23 +65,18 @@ Loop:
   func assignRandomType(text string, rtm *slack.RTM, ev *slack.MessageEvent, input []string){
     switch text {
     case "randomPairs":
-			output:=shuffleAll(input, rtm, ev)
-			for i:= range output{
-				if(i%2==0 && i< len(output)-1){
-					rtm.SendMessage(rtm.NewOutgoingMessage(output[i]+" "+output[i+1], ev.Channel))
-					if(i == len(output)-2){
-						break
-					}
-				} else if(i == len(output)-1){
-					rtm.SendMessage(rtm.NewOutgoingMessage(output[i], ev.Channel))
-
-				}
-			}
+			output:=shuffleAll(input[2:])
+			selectRandomX(output, 2, rtm, ev)
     case "one":
 			selectRandomOne(input, rtm, ev)
     case "all":
-			output:=shuffleAll(input, rtm, ev)
+			output:=shuffleAll(input[2:])
 			rtm.SendMessage(rtm.NewOutgoingMessage(strings.Join(output," "), ev.Channel))
+		case "goGet":
+			output:=shuffleAll(input[3:])
+			groupCount, _ := strconv.Atoi(input[2])
+			selectRandomX(output, groupCount, rtm, ev)
+
     default:
       rtm.SendMessage(rtm.NewOutgoingMessage("arza3", ev.Channel))
 
@@ -91,14 +87,30 @@ Loop:
 		rtm.SendMessage(rtm.NewOutgoingMessage(input[rand.Intn(len(input))], ev.Channel))
 	}
 
-	func shuffleAll(input []string,rtm *slack.RTM, ev *slack.MessageEvent) []string{
-		input = append(input[:0], input[2:]...)
+	func selectRandomX(input []string, groupCount int, rtm *slack.RTM, ev *slack.MessageEvent){
+		for i:= range input{
+			if(i%groupCount==0 && i< len(input)-groupCount+1){
+				j := 0
+				messageContent := ""
+				for j < groupCount {
+					messageContent += input[i+j] + " "
+					j++
+				}
+				rtm.SendMessage(rtm.NewOutgoingMessage(messageContent, ev.Channel))
+				if(i == len(input)-groupCount){
+					break
+				}
+			} else if (i >= len(input)-groupCount+1) {
+				rtm.SendMessage(rtm.NewOutgoingMessage(input[i], ev.Channel))
+				}
+		}
+	}
+
+	func shuffleAll(input []string) []string{
 		for i:=range input{
-			fmt.Println(i)
 			j:= rand.Intn(i+1)
 			input[i], input[j] = input[j], input[i]
 		}
-		fmt.Println("INPUT" , input)
 		return input
 		// return strings.Join(input, " ")
 	}
