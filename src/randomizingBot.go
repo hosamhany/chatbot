@@ -10,7 +10,17 @@ import (
 	"math/rand"
 	"time"
 	"strconv"
+	"github.com/ryanbradynd05/go-tmdb"
 )
+
+type TMDb struct {
+  apiKey string
+}
+
+func Init(apiKey string) *TMDb {
+  return &TMDb{apiKey: apiKey}
+}
+
 func main() {
 	rand.Seed(time.Now().Unix())
   err := godotenv.Load()
@@ -20,8 +30,10 @@ func main() {
 	token := os.Getenv("SLACK_TOKEN")
 	api := slack.New(token)
 	rtm := api.NewRTM()
-  // var input = []string
-  // var RandType = ""
+	
+	tmdb_key := os.Getenv("TMDB_APIKEY")
+	tmdb := tmdb.Init(tmdb_key)
+	
 	go rtm.ManageConnection()
 
 Loop:
@@ -40,7 +52,7 @@ Loop:
 				if ev.User != info.User.ID && strings.HasPrefix(ev.Text, prefix) {
           fmt.Println(ev.User)
           var input = addIntoArray(ev.Text)
-          assignRandomType(input[1], rtm, ev, input)
+          assignRandomType(input[1], rtm, ev, input, tmdb)
           // rtm.SendMessage(rtm.NewOutgoingMessage(randType, ev.Channel))
 					// rtm.SendMessage(rtm.NewOutgoingMessage(erza3(input), ev.Channel))
 				}
@@ -62,7 +74,7 @@ Loop:
     return strings.Split(text, " ")
   }
 
-  func assignRandomType(text string, rtm *slack.RTM, ev *slack.MessageEvent, input []string){
+  func assignRandomType(text string, rtm *slack.RTM, ev *slack.MessageEvent, input []string, tmdb *tmdb.TMDb){
     switch text {
     case "randomPairs":
 			output:=shuffleAll(input[2:])
@@ -76,12 +88,25 @@ Loop:
 			output:=shuffleAll(input[3:])
 			groupCount, _ := strconv.Atoi(input[2])
 			selectRandomX(output, groupCount, rtm, ev)
+		case "goMovies":
+			var page1Options = make(map[string]string)
+			page1Options["page"] = "1"
+			page1Result, err := tmdb.GetMoviePopular(page1Options)
+			// fmt.Println(page1Result.Results[0].Title)
+			if err ==nil {
+				selectRandomMovie(page1Result.Results, rtm, ev)
+			}
 
     default:
       rtm.SendMessage(rtm.NewOutgoingMessage("arza3", ev.Channel))
 
     }
-  }
+	}
+	
+	func selectRandomMovie(movies []tmdb.MovieShort,rtm *slack.RTM, ev *slack.MessageEvent){
+		rtm.SendMessage(rtm.NewOutgoingMessage(movies[rand.Intn(len(movies))].Title, ev.Channel))
+	}
+
 	func selectRandomOne(input []string,rtm *slack.RTM, ev *slack.MessageEvent){
 		input = append(input[:0], input[2:]...)
 		rtm.SendMessage(rtm.NewOutgoingMessage(input[rand.Intn(len(input))], ev.Channel))
