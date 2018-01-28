@@ -11,6 +11,8 @@ import (
 	"time"
 	"strconv"
 	"github.com/ryanbradynd05/go-tmdb"
+	"io/ioutil"
+
 )
 
 type TMDb struct {
@@ -30,10 +32,10 @@ func main() {
 	token := os.Getenv("SLACK_TOKEN")
 	api := slack.New(token)
 	rtm := api.NewRTM()
-	
+
 	tmdb_key := os.Getenv("TMDB_APIKEY")
 	tmdb := tmdb.Init(tmdb_key)
-	
+
 	go rtm.ManageConnection()
 
 Loop:
@@ -88,6 +90,8 @@ Loop:
 			output:=shuffleAll(input[3:])
 			groupCount, _ := strconv.Atoi(input[2])
 			selectRandomX(output, groupCount, rtm, ev)
+		case "help":
+			showHelp(rtm, ev)
 		case "goMovies":
 			var page1Options = make(map[string]string)
 			page1Options["page"] = "1"
@@ -102,7 +106,7 @@ Loop:
 
     }
 	}
-	
+
 	func selectRandomMovie(movies []tmdb.MovieShort,rtm *slack.RTM, ev *slack.MessageEvent){
 		rtm.SendMessage(rtm.NewOutgoingMessage(movies[rand.Intn(len(movies))].Title, ev.Channel))
 	}
@@ -138,4 +142,14 @@ Loop:
 		}
 		return input
 		// return strings.Join(input, " ")
+	}
+	func showHelp(rtm *slack.RTM, ev *slack.MessageEvent){
+		data, err := ioutil.ReadFile("../help.txt") // just pass the file name
+		    if err != nil {
+		        fmt.Print(err)
+		    }
+
+		    fmt.Println(string(data)) // print the content as 'bytes'
+				rtm.SendMessage(rtm.NewOutgoingMessage(string(data), ev.Channel))
+		    // str := string(data) // convert content to a 'string'
 	}
