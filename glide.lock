@@ -1,0 +1,12 @@
+hash: 9056cc84515b7f78e379c3b33bb2e727766cdc2129059da8f51bbd850f5ab7b0
+updated: 2018-02-01T00:17:36.880220222+02:00
+imports:
+- name: github.com/gorilla/websocket
+  version: 91f589db023d66e4aba7112d44cc0d2fb091c553
+- name: github.com/joho/godotenv
+  version: 6bb08516677f8c8274c557fc801bee9ab564ab2c
+- name: github.com/nlopes/slack
+  version: 280245264a9d8c496e95ead447421d37cd95f93a
+- name: github.com/ryanbradynd05/go-tmdb
+  version: 49d55dc561c641f56c82f2fddff0573892920557
+testImports: []
